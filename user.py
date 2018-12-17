@@ -4,7 +4,13 @@ from flask_jwt import jwt_required
 
 class User(Resource):
     TABLE_NAME = 'users'
-    
+
+    def __init__(self, _id = None, username = None, password = None):
+        self.id = _id 
+        self.username = username
+        self.password = password
+
+
     parser = reqparse.RequestParser()
     parser.add_argument('password', 
             type = str,
@@ -16,7 +22,7 @@ class User(Resource):
     def get(self, name):
         item = self.find_by_name(name)
         if item:
-            return item
+            return item.__dict__
         return {'message' : 'No user'}, 404
 
     @classmethod
@@ -29,7 +35,7 @@ class User(Resource):
         row = result.fetchone()
         
         if row:
-            user = {'id' : row[0], 'username' : row[1], 'password' : row[2]}
+            user = User(row[0], row[1], row[2])
         else:
             user = None
 
@@ -45,7 +51,7 @@ class User(Resource):
         result = cursor.execute(query, (_id,))
         row = result.fetchone()
         if row:
-            user = {'id' : row[0], 'username' : row[1], 'password' : row[2]}
+            user = User(row[0], row[1], row[2])
         else:
             user = None
         
@@ -111,7 +117,25 @@ class UserRegister(Resource):
         return {'message' : 'User {}create successful'.format(register_username)}
 
 
+class UserList(Resource):
+    TABLE_NAME = 'users'
 
+    @jwt_required()
+    def get(self):
+        connection = sqlite3.connect('data.db')
+        cursor = connection.cursor()
+        
+        query = "SELECT * FROM {table}".format(table = self.TABLE_NAME)
+        result = cursor.execute(query)
+        keys = [col[0] for col in result.description]
+        users = []
+
+        for row in result:
+            d = dict(zip(keys, row))
+            users.append(d)
+        connection.close()
+
+        return {'users' : users} 
 
 
 
