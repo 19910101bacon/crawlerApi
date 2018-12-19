@@ -5,7 +5,7 @@ from flask_jwt import JWT
 from resource.user import UserRegister, UserChangeProfile
 from resource.crawler import Crawler
 from resource.item import Item
-#from resource.article import Article
+from resource.article import Article
 from security import authenciate, identity
 
 app = Flask(__name__)
@@ -27,7 +27,7 @@ api.add_resource(UserRegister, '/register')
 api.add_resource(UserChangeProfile, '/profile')
 api.add_resource(Crawler, '/crawler')
 api.add_resource(Item, '/item')
-#api.add_resource(Article, '/item/<string:item_name>/<int:id>')
+api.add_resource(Article, '/item/<string:item_name>/<int:id>')
 
 
 
